@@ -1,0 +1,2 @@
+[dokku-servers]
+apps.mydomain.com ansible_user=admin

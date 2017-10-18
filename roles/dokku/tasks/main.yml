@@ -1,0 +1,66 @@
+- name: Install Dokku apt-key
+  apt_key:
+    url: https://packagecloud.io/gpg.key
+    state: present
+
+- name: Install Dokku repository
+  apt_repository:
+    repo: deb https://packagecloud.io/dokku/dokku/debian stretch main
+    state: present
+
+- name: Install public key
+  copy:
+    content: "{{ ssh_public_key }}"
+    dest: /root/.ssh/id_rsa.pub
+
+- name: Dokku web_config
+  debconf:
+    name: dokku
+    question: dokku/web_config
+    value: false
+    vtype: boolean
+
+- name: Dokku vhost_enable
+  debconf:
+    name: dokku
+    question: dokku/vhost_enable
+    value: true
+    vtype: boolean
+
+- name: Dokku hostname
+  debconf:
+    name: dokku
+    question: dokku/hostname
+    value: apps.jareddickson.com
+    vtype: string
+
+- name: Dokku skip_key_file
+  debconf:
+    name: dokku
+    question: dokku/skip_key_file
+    value: false
+    vtype: boolean
+
+- name: Dokku key_file
+  debconf:
+    name: dokku
+    question: dokku/key_file
+    value: /root/.ssh/id_rsa.pub
+    vtype: string
+
+- name: Install the latest version of Dokku
+  apt:
+    name: dokku
+    update_cache: yes
+    state: latest
+
+- name: Check for LetsEncrypt
+  shell: dokku plugin:list | grep letsencrypt | wc -l
+  register: has_plugin_letsencrypt
+
+- name: Install LetsEncrypt plugin
+  shell: dokku plugin:install https://github.com/dokku/dokku-letsencrypt.git
+  when: has_plugin_letsencrypt.stdout == "0"
+
+- name: Configure LetsEncrypt
+  shell: dokku config:set --global DOKKU_LETSENCRYPT_EMAIL={{ letsencrypt_email }}

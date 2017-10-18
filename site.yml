@@ -1,0 +1,7 @@
+---
+- name: Install Docker, Dokku and Dokku Plugins
+  hosts: dokku-servers
+  become: yes
+  roles:
+    - docker
+    - dokku

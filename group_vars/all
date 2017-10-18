@@ -1,0 +1,2 @@
+letsencrypt_email: user@mydomain.com
+ssh_public_key: ssh-rsa paste_your_ssh_public_key_here
